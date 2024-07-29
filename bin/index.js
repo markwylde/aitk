@@ -8,7 +8,7 @@ const ignore = ['.terraform.lock.hcl', '.terraform', '.git', '.DS_Store', 'node_
 const ignoreExtensions = ['png', 'svg', 'jpg', 'jpeg', 'bin'];
 
 // Function to list all files recursively
-function listFiles(dir, dumpContent = false, output = '', baseDir = dir) {
+function listFiles(dir, dumpContent = false, output = '', baseDir = '') {
   const files = fs.readdirSync(dir, { withFileTypes: true });
   files.forEach(file => {
       const ext = file.name.split('.').at(-1);
@@ -16,9 +16,9 @@ function listFiles(dir, dumpContent = false, output = '', baseDir = dir) {
           return;
       }
       const filePath = path.join(dir, file.name);
-      const relativePath = path.relative(baseDir, filePath);
+      const relativePath = path.join(baseDir, path.relative(dir, filePath));
       if (file.isDirectory()) {
-          output = listFiles(filePath, dumpContent, output, baseDir);
+          output = listFiles(filePath, dumpContent, output, relativePath);
       } else {
           if (dumpContent) {
             output += `# ${relativePath}\n`;
@@ -45,7 +45,7 @@ const argv = minimist(process.argv.slice(2));
 
 // Help message
 const helpMessage = `
-Usage: aitk [command] [directory]
+Usage: aitk [command] [directory1] [directory2] ...
 
 Commands:
   cat     Dump all file contents into a text file
@@ -64,24 +64,29 @@ function main() {
     }
 
     const command = argv._[0];
-    const directory = argv._[1] || process.cwd();
+    const directories = argv._.slice(1);
 
-    if (!fs.existsSync(directory) || !fs.statSync(directory).isDirectory()) {
-        console.error(`Error: "${directory}" is not a valid directory.`);
-        return;
+    if (directories.length === 0) {
+        directories.push(process.cwd());
     }
 
     let output = '';
 
     switch (command) {
         case 'cat':
-            output = listFiles(directory, true);
-            console.log(output);
-            console.log('File contents dumped to output.txt');
-            break;
         case 'ls':
-            output = listFiles(directory, false);
+            directories.forEach(directory => {
+                if (!fs.existsSync(directory) || !fs.statSync(directory).isDirectory()) {
+                    console.error(`Error: "${directory}" is not a valid directory.`);
+                    return;
+                }
+                const baseName = path.basename(directory);
+                output += listFiles(directory, command === 'cat', '', baseName);
+            });
             console.log(output);
+            if (command === 'cat') {
+                console.log('File contents dumped to output.txt');
+            }
             break;
         default:
             console.log('Invalid command. Use "aitk help" for usage information.');
