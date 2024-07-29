@@ -1,0 +1,26 @@
+{
+  "name": "ai-toolkit",
+  "version": "1.0.0",
+  "bin": {
+    "aitk": "bin/index.js"
+  },
+  "type": "module",
+  "main": "bin/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "files": [
+    "bin"
+  ],
+  "keywords": [],
+  "author": {
+    "email": "me@markwylde.com",
+    "name": "Mark Wylde",
+    "url": "https://markwylde.com"
+  },
+  "license": "MIT",
+  "description": "A set of utilities for working with ai tools",
+  "dependencies": {
+    "minimist": "^1.2.8"
+  }
+}
