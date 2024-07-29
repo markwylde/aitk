@@ -12,7 +12,7 @@ function listFiles(dir, dumpContent = false, output = '', baseDir = '') {
   const files = fs.readdirSync(dir, { withFileTypes: true });
   files.forEach(file => {
       const ext = file.name.split('.').at(-1);
-      if (ignore.includes(file.name) || ignoreExtensions.includes(ext)) {
+      if (ignore.includes(file.name || (file.name.includes('.') && ignoreExtensions.includes(ext)))) {
           return;
       }
       const filePath = path.join(dir, file.name);
