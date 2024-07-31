@@ -3,25 +3,64 @@
 import fs from 'fs';
 import path from 'path';
 import minimist from 'minimist';
+import os from 'os';
+import ignore from 'ignore';
 
-const ignore = ['.next', '.husky', '.terraform.lock.hcl', '.terraform', '.git', '.DS_Store', 'node_modules', 'package-lock.json', 'coverage'];
-const ignoreExtensions = ['png', 'svg', 'jpg', 'jpeg', 'bin', 'stories.tsx'];
+// Read the global ~/.aitkignore file once at the start
+const homeAitkignorePath = path.join(os.homedir(), '.aitkignore');
+let globalIgnoreRules = [];
+try {
+  if (fs.existsSync(homeAitkignorePath)) {
+    globalIgnoreRules = fs.readFileSync(homeAitkignorePath, 'utf8').split('\n').filter(line => line.trim() !== '');
+  }
+} catch (err) {
+  console.error(`Error reading global .aitkignore file: ${err.message}`);
+}
+
+// Function to find the closest .aitkignore file
+function findClosestAitkignore(dir) {
+  let currentDir = dir;
+  while (currentDir !== path.parse(currentDir).root) {
+    const aitkignorePath = path.join(currentDir, '.aitkignore');
+    if (fs.existsSync(aitkignorePath)) {
+      return aitkignorePath;
+    }
+    currentDir = path.dirname(currentDir);
+  }
+  return null;
+}
+
+// Function to read and parse .aitkignore files
+function parseAitkignore(aitkignorePath) {
+  if (!aitkignorePath) return [];
+  try {
+    return fs.readFileSync(aitkignorePath, 'utf8').split('\n').filter(line => line.trim() !== '');
+  } catch (err) {
+    console.error(`Error reading .aitkignore file: ${err.message}`);
+    return [];
+  }
+}
 
 // Function to list all files recursively
 function listFiles(dir, dumpContent = false, output = '', baseDir = '', depth = 0) {
-  const files = fs.readdirSync(dir, {
-    withFileTypes: true
-  });
-  files.forEach((file, index) => {
-    const fileNameParts = file.name.split('.');
-    const ext = fileNameParts.length > 1 ? fileNameParts.slice(-2).join('.') : fileNameParts[fileNameParts.length - 1];
+  const closestAitkignore = findClosestAitkignore(dir);
 
-    if (ignore.includes(file.name) || ignoreExtensions.includes(ext)) {
+  const ignoreRules = [
+    ...parseAitkignore(closestAitkignore),
+    ...globalIgnoreRules
+  ];
+
+  const ig = ignore().add(ignoreRules);
+
+  const files = fs.readdirSync(dir, { withFileTypes: true });
+  files.forEach((file, index) => {
+    const filePath = path.join(dir, file.name);
+    const relativePath = path.relative(process.cwd(), filePath);
+
+    if (ig.ignores(relativePath)) {
       return;
     }
 
-    const filePath = path.join(dir, file.name);
-    const relativePath = path.join(baseDir, path.relative(dir, filePath));
     const isLast = index === files.length - 1;
     const prefix = depth === 0 ? '' : '  '.repeat(depth - 1) + (isLast ? '└─ ' : '├─ ');
 

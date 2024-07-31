@@ -22,6 +22,7 @@
   "license": "MIT",
   "description": "A set of utilities for working with ai tools",
   "dependencies": {
+    "ignore": "^5.3.1",
     "minimist": "^1.2.8"
   }
 }
