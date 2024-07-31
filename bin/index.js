@@ -5,6 +5,7 @@ import path from 'path';
 import minimist from 'minimist';
 import os from 'os';
 import ignore from 'ignore';
+import ts from 'typescript';
 
 // Read the global ~/.aitkignore file once at the start
 const homeAitkignorePath = path.join(os.homedir(), '.aitkignore');
@@ -90,6 +91,72 @@ function listFiles(dir, dumpContent = false, output = '', baseDir = '', depth = 
   return output;
 }
 
+// Function to extract types and function signatures
+function extractTypesAndFunctions(filePath) {
+  const fileContent = fs.readFileSync(filePath, 'utf8');
+  const sourceFile = ts.createSourceFile(filePath, fileContent, ts.ScriptTarget.Latest, true);
+
+  let output = '';
+
+  function visit(node) {
+    if (ts.isFunctionDeclaration(node) || ts.isMethodDeclaration(node) || ts.isArrowFunction(node)) {
+      const name = node.name ? node.name.getText(sourceFile) : 'anonymous';
+      const params = node.parameters.map(p => p.getText(sourceFile)).join(', ');
+      const returnType = node.type ? node.type.getText(sourceFile) : 'any';
+      output += `${ts.isExportAssignment(node.parent) ? 'export ' : ''}function ${name}(${params}): ${returnType}\n\n`;
+    } else if (ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node)) {
+      output += `${node.getText(sourceFile)}\n\n`;
+    } else if (ts.isClassDeclaration(node)) {
+      output += `class ${node.name.getText(sourceFile)} {\n`;
+      node.members.forEach(member => {
+        if (ts.isMethodDeclaration(member) || ts.isPropertyDeclaration(member)) {
+          output += `  ${member.getText(sourceFile)}\n`;
+        }
+      });
+      output += '}\n\n';
+    }
+
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return output;
+}
+
+// Function to list all files recursively and extract types
+function listTypesAndFunctions(dir, output = '', baseDir = '', depth = 0) {
+  const closestAitkignore = findClosestAitkignore(dir);
+
+  const ignoreRules = [
+    ...parseAitkignore(closestAitkignore),
+    ...globalIgnoreRules
+  ];
+
+  const ig = ignore().add(ignoreRules);
+
+  const files = fs.readdirSync(dir, { withFileTypes: true });
+  files.forEach((file) => {
+    const filePath = path.join(dir, file.name);
+    const relativePath = path.relative(process.cwd(), filePath);
+
+    if (ig.ignores(relativePath)) {
+      return;
+    }
+
+    if (file.isDirectory()) {
+      output = listTypesAndFunctions(filePath, output, relativePath, depth + 1);
+    } else if (file.name.match(/\.(js|ts|jsx|tsx)$/)) {
+      output += `# ${relativePath}\n`;
+      const fileContent = extractTypesAndFunctions(filePath);
+      if (fileContent.trim()) {
+        output += fileContent;
+        output += '\n';
+      }
+    }
+  });
+  return output;
+}
+
 // Parse command line arguments
 const argv = minimist(process.argv.slice(2));
 
@@ -100,6 +167,7 @@ Usage: aitk [command] [directory1] [directory2] ...
 Commands:
   cat     Dump all file contents into a text file
   ls      Show a recursive directory tree of all files
+  types   List all types and function signatures for TypeScript and JavaScript files
   help    Show this help message
 
 Options:
@@ -137,6 +205,16 @@ function main() {
       if (command === 'cat') {
         console.log('File contents dumped to output.txt');
       }
+      break;
+    case 'types':
+      directories.forEach(directory => {
+        if (!fs.existsSync(directory) || !fs.statSync(directory).isDirectory()) {
+          console.error(`Error: "${directory}" is not a valid directory.`);
+          return;
+        }
+        output += listTypesAndFunctions(directory);
+      });
+      console.log(output);
       break;
     default:
       console.log('Invalid command. Use "aitk help" for usage information.');

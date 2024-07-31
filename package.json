@@ -23,6 +23,7 @@
   "description": "A set of utilities for working with ai tools",
   "dependencies": {
     "ignore": "^5.3.1",
-    "minimist": "^1.2.8"
+    "minimist": "^1.2.8",
+    "typescript": "^5.5.4"
   }
 }
