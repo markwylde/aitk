@@ -1,6 +1,6 @@
 # AI Toolkit (aitk)
 
-AI Toolkit is a command-line utility for listing and dumping file contents in a directory structure, designed to assist with AI-related tasks.
+AI Toolkit is a command-line utility for listing and dumping file contents in a directory structure, designed to assist with AI-related tasks. It now includes functionality to extract types and function signatures from TypeScript and JavaScript files.
 
 ## Installation
 
@@ -20,6 +20,7 @@ aitk [command] [directory1] [directory2] ...
 
 - `cat`: Dump all file contents into a text file
 - `ls`: Show a recursive directory tree of all files
+- `types`: List all types and function signatures for TypeScript and JavaScript files
 - `help`: Show the help message
 
 ### Options
@@ -43,7 +44,12 @@ aitk [command] [directory1] [directory2] ...
    aitk ls /path/to/dir1 /path/to/dir2
    ```
 
-4. Show help message:
+4. Extract types and function signatures from TypeScript and JavaScript files:
+   ```bash
+   aitk types /path/to/directory
+   ```
+
+5. Show help message:
    ```bash
    aitk help
    ```
@@ -56,6 +62,7 @@ aitk [command] [directory1] [directory2] ...
 - Supports a global ~/.aitkignore file for system-wide ignore rules
 - Dumps file contents with file paths as headers
 - Displays directory structure with tree-like formatting
+- Extracts and lists types and function signatures from TypeScript and JavaScript files
 
 ## Ignore Rules
 
@@ -69,3 +76,15 @@ build/
 ```
 
 This will ignore the `node_modules` directory, all files with the `.log` extension, and the `build` directory.
+
+## Type and Function Extraction
+
+The `types` command extracts and displays:
+- Function declarations (including export status)
+- Method declarations
+- Arrow functions
+- Interface declarations
+- Type alias declarations
+- Class declarations (including methods and properties)
+
+This feature is particularly useful for quickly understanding the structure and API of TypeScript and JavaScript projects.
