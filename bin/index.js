@@ -4,40 +4,49 @@ import fs from 'fs';
 import path from 'path';
 import minimist from 'minimist';
 
-const ignore = ['.terraform.lock.hcl', '.terraform', '.git', '.DS_Store', 'node_modules', 'package-lock.json', 'coverage'];
+const ignore = ['.next', '.husky', '.terraform.lock.hcl', '.terraform', '.git', '.DS_Store', 'node_modules', 'package-lock.json', 'coverage'];
 const ignoreExtensions = ['png', 'svg', 'jpg', 'jpeg', 'bin'];
 
 // Function to list all files recursively
-function listFiles(dir, dumpContent = false, output = '', baseDir = '') {
-  const files = fs.readdirSync(dir, { withFileTypes: true });
-  files.forEach(file => {
-      const ext = file.name.split('.').at(-1);
-      if (ignore.includes(file.name || (file.name.includes('.') && ignoreExtensions.includes(ext)))) {
-          return;
-      }
-      const filePath = path.join(dir, file.name);
-      const relativePath = path.join(baseDir, path.relative(dir, filePath));
-      if (file.isDirectory()) {
-          output = listFiles(filePath, dumpContent, output, relativePath);
-      } else {
-          if (dumpContent) {
-            output += `# ${relativePath}\n`;
-          } else {
-            output += `- ${relativePath}\n`;
-          }
-          if (dumpContent) {
-              output += "```\n";
-              try {
-                  const content = fs.readFileSync(filePath, 'utf8');
-                  output += content + "\n";
-              } catch (err) {
-                  output += `Error reading file: ${err.message}\n`;
-              }
-              output += "```\n\n";
-          }
-      }
-  });
-  return output;
+function listFiles(dir, dumpContent = false, output = '', baseDir = '', depth = 0) {
+    const files = fs.readdirSync(dir, { withFileTypes: true });
+    files.forEach((file, index) => {
+        const fileNameParts = file.name.split('.');
+        const ext = fileNameParts.length > 1 ? fileNameParts.slice(-2).join('.') : fileNameParts[fileNameParts.length - 1];
+        
+        if (ignore.includes(file.name) || ignoreExtensions.includes(ext)) {
+            return;
+        }
+        
+        const filePath = path.join(dir, file.name);
+        const relativePath = path.join(baseDir, path.relative(dir, filePath));
+        const isLast = index === files.length - 1;
+        const prefix = depth === 0 ? '' : '  '.repeat(depth - 1) + (isLast ? '└─ ' : '├─ ');
+
+        if (file.isDirectory()) {
+            if (!dumpContent) {
+                output += `${prefix}${file.name}/\n`;
+            }
+            output = listFiles(filePath, dumpContent, output, relativePath, depth + 1);
+        } else {
+            if (dumpContent) {
+                output += `# ${relativePath}\n`;
+            } else {
+                output += `${prefix}${file.name}\n`;
+            }
+            if (dumpContent) {
+                output += "```\n";
+                try {
+                    const content = fs.readFileSync(filePath, 'utf8');
+                    output += content + "\n";
+                } catch (err) {
+                    output += `Error reading file: ${err.message}\n`;
+                }
+                output += "```\n\n";
+            }
+        }
+    });
+    return output;
 }
 
 // Parse command line arguments
