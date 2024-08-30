@@ -1,6 +1,6 @@
 # AI Toolkit (aitk)
 
-AI Toolkit is a command-line utility for listing and dumping file contents in a directory structure, designed to assist with AI-related tasks. It now includes functionality to extract types and function signatures from TypeScript and JavaScript files.
+AI Toolkit is a command-line utility for listing and dumping file contents in a directory structure, designed to assist with AI-related tasks. It now includes functionality to extract types and function signatures from TypeScript and JavaScript files, as well as AI-powered features for asking questions and editing files.
 
 ## Installation
 
@@ -13,7 +13,7 @@ npm install -g @markwylde/ai-toolkit
 ## Usage
 
 ```bash
-aitk [command] [directory1] [directory2] ...
+aitk [command] [options] [directory1] [directory2] ...
 ```
 
 ## Configuration
@@ -30,6 +30,8 @@ export LITELLM_AUTH_TOKEN="your auth token"
 - `cat`: Dump all file contents into a text file
 - `ls`: Show a recursive directory tree of all files
 - `types`: List all types and function signatures for TypeScript and JavaScript files
+- `ask`: Ask a question to an AI model
+- `edit`: Apply AI-powered edits to files in the current directory
 - `help`: Show the help message
 
 ### Options
@@ -58,7 +60,17 @@ export LITELLM_AUTH_TOKEN="your auth token"
    aitk types /path/to/directory
    ```
 
-5. Show help message:
+5. Ask a question to an AI model:
+   ```bash
+   aitk ask "Who are you?"
+   ```
+
+6. Apply AI-powered edits to files in the current directory:
+   ```bash
+   aitk edit "Refactor the main function to use async/await"
+   ```
+
+7. Show help message:
    ```bash
    aitk help
    ```
@@ -72,6 +84,8 @@ export LITELLM_AUTH_TOKEN="your auth token"
 - Dumps file contents with file paths as headers
 - Displays directory structure with tree-like formatting
 - Extracts and lists types and function signatures from TypeScript and JavaScript files
+- AI-powered question answering
+- AI-powered file editing with diff view and HTML report generation
 
 ## Ignore Rules
 
@@ -97,3 +111,11 @@ The `types` command extracts and displays:
 - Class declarations (including methods and properties)
 
 This feature is particularly useful for quickly understanding the structure and API of TypeScript and JavaScript projects.
+
+## AI-Powered Features
+
+### Ask Command
+The `ask` command allows you to ask questions to an AI model. It will prompt you to select a model from the available options and then provide an answer to your question.
+
+### Edit Command
+The `edit` command applies AI-powered edits to files in the current directory. It generates an HTML report with diffs between the original and suggested content, which opens automatically in your default browser.

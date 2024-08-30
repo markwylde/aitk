@@ -43,7 +43,11 @@ async function main() {
 
   const command = argv._[0];
   const args = argv._.slice(1);
-  let directories = [];
+  const directories = argv._.slice(1);
+  if (directories.length === 0) {
+    directories.push(process.cwd());
+  }
+
   let output = '';
 
   switch (command) {
@@ -58,9 +62,6 @@ async function main() {
         output += listFiles(directory, command === 'cat', '', baseName);
       });
       console.log(output);
-      if (command === 'cat') {
-        console.log('File contents dumped to output.txt');
-      }
       break;
       case 'ask':
         const question = argv._.slice(1).join(' ');
