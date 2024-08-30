@@ -16,6 +16,15 @@ npm install -g @markwylde/ai-toolkit
 aitk [command] [directory1] [directory2] ...
 ```
 
+## Configuration
+If you want to use the litellm ai features, you will need to ensure the following environment
+variables are set either in a near `.env` file, or in your shell environment:
+
+```bash
+export LITELLM_API_URL="http://localhost:4000"
+export LITELLM_AUTH_TOKEN="your auth token"
+```
+
 ### Commands
 
 - `cat`: Dump all file contents into a text file
