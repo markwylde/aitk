@@ -3,12 +3,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import minimist from 'minimist';
-import inquirer from 'inquirer';
 import chalk from 'chalk';
 
 import listTypesAndFunctions from '../src/listTypesAndFunctions';
 import listFiles from '../src/listFiles';
 import { queryModel, listModels } from '../src/ai';
+import editFiles from '../src/editFiles';
+import selectModel from '../src/selectModel';
 
 const argv = minimist(process.argv.slice(2));
 
@@ -20,6 +21,7 @@ Commands:
   ls      Show a recursive directory tree of all files
   types   List all types and function signatures for TypeScript and JavaScript files
   ask     Ask a question to an AI model
+  edit    Apply AI-powered edits to files in the current directory
   help    Show this help message
 
 Options:
@@ -30,19 +32,8 @@ Examples:
   aitk cat ./src
   aitk ls ./src ./tests
   aitk types ./src
+  aitk edit "Refactor the main function to use async/await"
 `;
-
-async function selectModel(models: string[]): Promise<string> {
-  const { model } = await inquirer.prompt([
-    {
-      type: 'list',
-      name: 'model',
-      message: 'Select a model:',
-      choices: models,
-    },
-  ]);
-  return model;
-}
 
 async function main() {
   if (argv.help || argv._.includes('help') || argv._.length === 0) {
@@ -51,12 +42,8 @@ async function main() {
   }
 
   const command = argv._[0];
-  const directories = argv._.slice(1);
-
-  if (directories.length === 0 && command !== 'ask') {
-    directories.push(process.cwd());
-  }
-
+  const args = argv._.slice(1);
+  let directories = [];
   let output = '';
 
   switch (command) {
@@ -97,6 +84,15 @@ async function main() {
         });
         console.log();
         break;
+    case 'edit':
+      if (args.length === 0) {
+        console.error('Please provide an edit instruction after the "edit" command.');
+        return;
+      }
+      const editInstruction = args.join(' ');
+      const currentDirectory = process.cwd();
+      await editFiles([currentDirectory], editInstruction);
+      break;
     case 'types':
       directories.forEach(directory => {
         if (!fs.existsSync(directory) || !fs.statSync(directory).isDirectory()) {

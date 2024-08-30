@@ -94,7 +94,6 @@ export async function queryModel(options: QueryOptions): Promise<string> {
   } else {
     const data: QueryResponse = await response.json();
     const content = data.choices[0].message.content;
-    console.log('Response:', content);
     return content;
   }
 }
