@@ -1,7 +1,7 @@
 {
   "name": "@markwylde/ai-toolkit",
   "private": false,
-  "version": "1.7.1",
+  "version": "1.7.2",
   "bin": {
     "aitk": "bin/index.ts"
   },
