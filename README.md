@@ -1,4 +1,4 @@
-# AI Toolkit (aitk)
+# aitk (the ai toolkit)
 
 AI Toolkit is a command-line utility for listing and dumping file contents in a directory structure, designed to assist with AI-related tasks. It now includes functionality to extract types and function signatures from TypeScript and JavaScript files, as well as AI-powered features for asking questions and editing files.
 
@@ -7,7 +7,7 @@ AI Toolkit is a command-line utility for listing and dumping file contents in a 
 To install the AI Toolkit globally, run:
 
 ```bash
-npm install -g @markwylde/ai-toolkit
+npm install -g @markwylde/aitk
 ```
 
 ## Usage
@@ -31,6 +31,7 @@ export LITELLM_AUTH_TOKEN="your auth token"
 - `ls`: Show a recursive directory tree of all files
 - `types`: List all types and function signatures for TypeScript and JavaScript files
 - `ask`: Ask a question to an AI model
+- `prompt`: Ask an AI model to generate a prompt for changing your code
 - `edit`: Apply AI-powered edits to files in the current directory
 - `help`: Show the help message
 
