@@ -25,17 +25,19 @@
   "dependencies": {
     "chalk": "^5.3.0",
     "cli-progress": "^3.12.0",
-    "diff": "^6.0.0-beta",
+    "clipboardy": "^4.0.0",
+    "diff": "^7.0.0",
     "dotenv": "^16.4.5",
-    "ignore": "^5.3.2",
-    "inquirer": "^10.1.8",
+    "ignore": "^6.0.2",
+    "inquirer": "^11.1.0",
+    "jsonrepair": "^3.8.1",
     "minimist": "^1.2.8",
     "open": "^10.1.0",
     "ora": "^8.1.0",
-    "typescript": "^5.5.4"
+    "typescript": "^5.6.2"
   },
   "devDependencies": {
-    "@types/node": "^22.5.1",
-    "tsx": "^4.19.0"
+    "@types/node": "^22.7.4",
+    "tsx": "^4.19.1"
   }
 }

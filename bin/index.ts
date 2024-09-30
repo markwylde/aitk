@@ -3,13 +3,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import minimist from 'minimist';
-import chalk from 'chalk';
 
 import listTypesAndFunctions from '../src/listTypesAndFunctions';
 import listFiles from '../src/listFiles';
-import { queryModel, listModels } from '../src/ai';
 import editFiles from '../src/editFiles';
-import selectModel from '../src/selectModel';
+import { ask } from '../src/ask';
+import { prompt } from '../src/prompt';
 
 const argv = minimist(process.argv.slice(2));
 
@@ -21,6 +20,7 @@ Commands:
   ls      Show a recursive directory tree of all files
   types   List all types and function signatures for TypeScript and JavaScript files
   ask     Ask a question to an AI model
+  prompt  Ask an AI model to generate a prompt for changing your code
   edit    Apply AI-powered edits to files in the current directory
   help    Show this help message
 
@@ -29,6 +29,7 @@ Options:
 
 Examples:
   aitk ask "Who are you?"
+  aitk prompt "Say hello when the project is run"
   aitk cat ./src
   aitk ls ./src ./tests
   aitk types ./src
@@ -63,28 +64,26 @@ async function main() {
       });
       console.log(output);
       break;
-      case 'ask':
-        const question = argv._.slice(1).join(' ');
-        if (!question) {
-          console.error('Please provide a question after the "ask" command.');
-          return;
-        }
-        const modelsResponse = await listModels();
-        const modelChoices = modelsResponse.data.map(model => model.id);
-        const selectedModel = await selectModel(modelChoices);
-
-        console.log(chalk.green('[question]:'), question);
-        process.stdout.write(chalk.cyan('[answer]:') + ' ');
-        await queryModel({
-          stream: true,
-          model: selectedModel,
-          messages: [{
-            content: question,
-            role: 'user'
-          }]
-        });
-        console.log();
-        break;
+    case 'ask': {
+      const question = argv._.slice(1).join(' ');
+      if (!question) {
+        console.error('Please provide a question after the "ask" command.');
+        return;
+      }
+      ask(question);
+      console.log();
+      break;
+    }
+    case 'prompt': {
+      const question = argv._.slice(1).join(' ');
+      if (!question) {
+        console.error('Please provide a question after the "prompt" command.');
+        return;
+      }
+      prompt({ command }, question);
+      console.log();
+      break;
+    }
     case 'edit':
       if (args.length === 0) {
         console.error('Please provide an edit instruction after the "edit" command.');
