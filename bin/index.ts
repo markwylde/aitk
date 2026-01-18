@@ -9,6 +9,7 @@ import listFiles from '../src/listFiles';
 import editFiles from '../src/editFiles';
 import { ask } from '../src/ask';
 import { prompt } from '../src/prompt';
+import { develop } from '../src/develop';
 
 const argv = minimist(process.argv.slice(2));
 
@@ -30,6 +31,7 @@ Options:
 Examples:
   aitk ask "Who are you?"
   aitk prompt "Say hello when the project is run"
+  aitk develop "Add a subtract utility function that I can use throughout my code"
   aitk cat ./src
   aitk ls ./src ./tests
   aitk types ./src
@@ -81,6 +83,16 @@ async function main() {
         return;
       }
       prompt({ command }, question);
+      console.log();
+      break;
+    }
+    case 'develop': {
+      const question = argv._.slice(1).join(' ');
+      if (!question) {
+        console.error('Please provide a question after the "develop" command.');
+        return;
+      }
+      develop({ command }, question);
       console.log();
       break;
     }
